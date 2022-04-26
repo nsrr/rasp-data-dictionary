@@ -1,0 +1,28 @@
+[
+  {
+    "value": "nimh",
+    "display_name": "National Institute of Mental Health",
+    "description": ""
+  },
+  {
+    "value": "bch",
+    "display_name": "Boston Children's Hospital",
+    "description": ""
+  },
+  {
+    "value": "tch",
+    "display_name": "Texas Children's Hospital",
+    "description": ""
+  },
+  {
+    "value": "geisinger",
+    "display_name": "Geisinger",
+    "description": ""
+  },
+  {
+    "value": "nyu",
+    "display_name": "NYU Langone Health",
+    "description": ""
+  }
+]
+

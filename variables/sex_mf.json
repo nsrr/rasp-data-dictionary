@@ -1,0 +1,8 @@
+{
+  "id": "sex_mf",
+  "display_name": "Subject sex",
+  "description": "",
+  "type": "choices",
+  "domain": "sex_mf",
+  "commonly_used": true
+}

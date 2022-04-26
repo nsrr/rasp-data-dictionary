@@ -1,8 +1,8 @@
 slug: rasp
-visit: visitnumber
+visit: encounter
 charts:
-- chart: crace
-  title: Race
+- chart: siteid
+  title: Site
 webservers:
   - name: production
     url: https://sleepdata.org

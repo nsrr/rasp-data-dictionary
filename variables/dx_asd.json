@@ -1,0 +1,8 @@
+{
+  "id": "dx_asd",
+  "display_name": "Diagnosis of Autism Spectrum Disorder (ASD)",
+  "description": "Harmonized from entries including 'asd' and 'autism'",
+  "type": "choices",
+  "domain": "yes_1",
+  "commonly_used": true
+}

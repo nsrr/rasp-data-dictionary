@@ -1,0 +1,8 @@
+{
+  "id": "dx_trisomy21",
+  "display_name": "Diagnosis of Trisomy 21 (Down Syndrome)",
+  "description": "Harmonized from entries including 'trisomy 21'",
+  "type": "choices",
+  "domain": "yes_1",
+  "commonly_used": true
+}
