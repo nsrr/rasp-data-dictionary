@@ -163,7 +163,7 @@
     nsrrid = id;
 
     *create edf name;
-    edfid = nsrrid || "-a.edf";
+    edfid = trim(nsrrid) || "-a.edf";
 
     *create siteid;
     format siteid $20.;
@@ -554,13 +554,232 @@
     by nsrrid;
   run;
 
-  data tch_final;
+  data tch_neuro;
     merge
       tch_cov
       tch_dx
       ;
     by nsrrid;
   run;
+
+  proc import datafile="&sourcepath\TCH - Group ABCD (854 sleep studies) deidentified.xlsx"
+    out=tch_sleepa_in
+    dbms=xlsx
+    replace;
+    sheet="Group A- 3 and younger";
+  run;
+
+  proc import datafile="&sourcepath\TCH - Group ABCD (854 sleep studies) deidentified.xlsx"
+    out=tch_sleepb_in
+    dbms=xlsx
+    replace;
+    sheet="Group B- age 4 and 5";
+  run;
+
+  proc import datafile="&sourcepath\TCH - Group ABCD (854 sleep studies) deidentified.xlsx"
+    out=tch_sleepc_in
+    dbms=xlsx
+    replace;
+    sheet="Group C - age 6-12";
+  run;
+
+  proc import datafile="&sourcepath\TCH - Group ABCD (854 sleep studies) deidentified.xlsx"
+    out=tch_sleepd_in
+    dbms=xlsx
+    replace;
+    sheet="Group D - 13 and above";
+  run;
+
+  data tch_sleepa;
+    set tch_sleepa_in;
+
+    *create nsrrid;
+    format nsrrid $30.;
+    nsrrid = De_identified_ID;
+
+    *create edf name;
+    edfid = trim(nsrrid) || ".edf";
+
+    *create siteid;
+    format siteid $20.;
+    siteid = 'tch';
+
+    *create age_years;
+    *only given to integer year, along with including some entries in Months;
+    if index(Age_at_the_time___of_sleep_study,"yo") then age_years = input(compress(Age_at_the_time___of_sleep_study,"yo"),8.);
+    else if index(Age_at_the_time___of_sleep_study,"mo") then age_years = input(compress(Age_at_the_time___of_sleep_study,"mo"),8.)/12;
+    else age_years = input(compress(Age_at_the_time___of_sleep_study,"yo"),8.);
+
+    *create sex_mf;
+    sex_mf = sex;
+
+    keep
+      nsrrid
+      edfid
+      siteid
+      typical
+      age_years
+      sex_mf
+      ;
+  run;
+
+  data tch_sleepb;
+    set tch_sleepb_in;
+
+    *create nsrrid;
+    format nsrrid $30.;
+    nsrrid = De_identified_ID;
+
+    *create edf name;
+    edfid = trim(nsrrid) || ".edf";
+
+    *create siteid;
+    format siteid $20.;
+    siteid = 'tch';
+
+    *create age_years;
+    *only given to integer year, along with including some entries in Months;
+    if index(Age_at_the_time___of_sleep_study,"yo") then age_years = input(compress(Age_at_the_time___of_sleep_study,"yo"),8.);
+    else if index(Age_at_the_time___of_sleep_study,"mo") then age_years = input(compress(Age_at_the_time___of_sleep_study,"mo"),8.)/12;
+    else age_years = input(compress(Age_at_the_time___of_sleep_study,"yo"),8.);
+
+    *create sex_mf;
+    sex_mf = sex;
+
+    keep
+      nsrrid
+      edfid
+      siteid
+      typical
+      age_years
+      sex_mf
+      ;
+  run;
+
+  data tch_sleepc;
+    set tch_sleepc_in;
+
+    *create nsrrid;
+    format nsrrid $30.;
+    nsrrid = De_identified_ID;
+
+    *create edf name;
+    edfid = trim(nsrrid) || ".edf";
+
+    *create siteid;
+    format siteid $20.;
+    siteid = 'tch';
+
+    *create age_years;
+    age_years = Age_at_the_time___of_sleep_study;
+
+    *create sex_mf;
+    sex_mf = sex;
+
+    keep
+      nsrrid
+      edfid
+      siteid
+      typical
+      age_years
+      sex_mf
+      ;
+  run;
+
+  data tch_sleepd;
+    set tch_sleepd_in;
+
+    *create nsrrid;
+    format nsrrid $30.;
+    nsrrid = De_identified_ID;
+
+    *create edf name;
+    edfid = trim(nsrrid) || ".edf";
+
+    *create siteid;
+    format siteid $20.;
+    siteid = 'tch';
+
+    *create age_years;
+    age_years = Age_at_the_time___of_sleep_study;
+
+    *create sex_mf;
+    sex_mf = sex;
+
+    keep
+      nsrrid
+      edfid
+      siteid
+      typical
+      age_years
+      sex_mf
+      ;
+  run;
+
+  data tch_sleep;
+    set
+      tch_sleepa
+      tch_sleepb
+      tch_sleepc
+      tch_sleepd
+      ;
+
+    if nsrrid = '' then delete;
+  run;
+
+  proc sort data=tch_sleep nodupkey dupout=tchcheck;
+    by nsrrid;
+  run;
+
+  data tch_all;
+    set 
+      tch_neuro
+      tch_sleep
+      ;
+  run;
+
+  proc sort data=tch_all nodupkey;
+    by nsrrid;
+  run;
+
+  proc import datafile="&sourcepath\tch-edf-idlist-20220916.csv"
+    out=tch_edflist_in
+    dbms=csv
+    replace;
+    guessingrows=1000;
+  run;
+
+  data tch_edflist;
+    set tch_edflist_in;
+
+    rename edfid = nsrrid;
+  run;
+
+  data tch_all_withedf;
+    merge
+      tch_all (in=a)
+      tch_edflist (in=b)
+      ;
+    by nsrrid;
+
+    if a and b;
+    *if a and not b then noedf = 1;
+    *if b and not a then nodataset = 1;
+  run;
+
+  /*
+
+  proc sql;
+    select nsrrid from tch_all_withedf where nodataset = 1;
+  quit;
+
+  proc sql;
+    select nsrrid from tch_all_withedf where noedf = 1;
+  quit;
+
+  NOTE: GA151 and GA152 have EDF but were not present in Aditya's covariate file.
+
+  */
 
 *******************************************************************************;
 * nyu import ;
@@ -664,7 +883,7 @@
       nimh_final
       bch_final
       geisinger_final
-      tch_final
+      tch_all_withedf
       nyu_final
       ;
 
@@ -797,6 +1016,10 @@
 
   *quick stats;
   ods pdf file="c:\temp\temp.pdf";
+
+  proc freq data=rasp_nsrr;
+    table siteid typical;
+  run;
 
   proc sort data=rasp_nsrr nodupkey out=rasp_nsrr_unique;
     by nsrrid;
